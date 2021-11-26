@@ -3,6 +3,7 @@ from vosk import Model, KaldiRecognizer, SetLogLevel
 import sys
 import os
 
+
 import wave
 import json
 
@@ -13,6 +14,9 @@ ALLOWED_EXTENSIONS = {'wav'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "./uploaded/" 
 
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
+SetLogLevel(-1)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -21,22 +25,11 @@ def allowed_file(filename):
 
 @app.post("/speech_to_text")
 def speech_to_text():
-
-    #if "file" not in request.files:
-    #    return redirect(request.url)
-    print("before reauest_file")
-    print(request.files)
     uploaded_file = request.files["file"]
-    #if uploaded_file.filename == '':
-    print("afet reauest_file")
-    #    return redirect(request.url)
     if uploaded_file and allowed_file(uploaded_file.filename):
         filename = uploaded_file.filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        print("filepath")
-        print(file_path)
         uploaded_file.save(file_path)
-        #return redirect(url_for('download_file', name=filename))
 
     model_name = "linto-model"
 
@@ -47,9 +40,7 @@ def speech_to_text():
         exit(1)
 
     wf = wave.open(file_path, "rb")
-
-    print(wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE")
-
+    
     if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
         print ("Audio file must be WAV format mono PCM.")
         exit(1)
@@ -66,9 +57,10 @@ def speech_to_text():
         if len(data) == 0:
             break
         if rec.AcceptWaveform(data):
-            result.append(rec.Result())
+            result.append(json.loads(rec.Result()))
         else:
-            partials.append(rec.PartialResult())
+            partials.append(json.loads(rec.PartialResult()))
 
-    return {"result": json.dumps(result), "partials":json.dumps(partials)}
+    ret = [sentence["alternatives"][0]["text"] for sentence in result]
+    return json.dumps(ret)
 
