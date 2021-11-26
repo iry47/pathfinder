@@ -51,16 +51,13 @@ def speech_to_text():
     rec.SetWords(True)
 
     result = []
-    partials = []
     while True:
         data = wf.readframes(4000)
         if len(data) == 0:
             break
         if rec.AcceptWaveform(data):
             result.append(json.loads(rec.Result()))
-        else:
-            partials.append(json.loads(rec.PartialResult()))
-
     ret = [sentence["alternatives"][0]["text"] for sentence in result]
+    print(ret)
     return json.dumps(ret)
 
