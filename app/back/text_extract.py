@@ -1,17 +1,10 @@
-import sys
-import os
-
 import pandas as pd
 import numpy as np
 # import matplotlib.pyplot as plt
 
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-from langdetect import detect
-from spacy.matcher import Matcher
-from spacy.attrs import IS_PUNCT, LOWER
 import spacy
-from gensim.models import word2vec
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
@@ -92,3 +85,7 @@ def determine_departure_destination(sentence):
         "departure": departure,
         "destination": destination
     }
+    
+def extract_travel_info(sentences):
+    travel_request = extract_travel_request(sentences)
+    return determine_departure_destination(travel_request)
