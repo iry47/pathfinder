@@ -3,8 +3,11 @@ import sys
 
 
 sys.path.insert(0, '/Users/ryanheadley/epitech/tor_2021_3') # change for your project path
-from app.back.nlp.text_extract import extract_travel_request, get_geolocation
+from app.back.nlp.text_extract import get_geolocation
+from app.back.nlp.text_extract import extract_travel_request
+from app.back.nlp.text_extract import determine_departure_destination
 from geopy import Location
+
 
 class TextExtractTests(unittest.TestCase):
 
@@ -30,6 +33,14 @@ class TextExtractTests(unittest.TestCase):
         }
         print(result)
         self.assertTrue(result == expected)
+
+    def test_determine_departure_destination(self):
+        result = determine_departure_destination(self.sentences[0])
+        expected = {
+            "departure": "Lille",
+            "destination": "Lyon"
+        }
+        self.assertEqual(result, expected)
         
     def test_get_geolocation(self):
         result = get_geolocation('paris')

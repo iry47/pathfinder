@@ -1,2 +1,5 @@
 vosk
-
+sentence_transformers
+flask_cors
+nltk
+geopy

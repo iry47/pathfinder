@@ -54,7 +54,7 @@ def extract_travel_request(sentences):
     )
     biggest_number = max(similarities[0])
     if biggest_number < 0.75:
-        return "SPAM"
+        return False
     best_sentence_ind = np.where(similarities[0] == biggest_number)
     return sentences[best_sentence_ind[0][0]]
 
@@ -86,10 +86,13 @@ def determine_departure_destination(sentence):
         "departure": departure,
         "destination": destination
     }
+
     
 def extract_travel_info(sentences):
     travel_request = extract_travel_request(sentences)
+    if not travel_request: return False
     return determine_departure_destination(travel_request)
+
 
 def get_geolocation(city):
     """Get the geolocation of a city
