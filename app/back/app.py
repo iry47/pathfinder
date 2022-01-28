@@ -135,6 +135,7 @@ def pathfinder():
                 message="You need to post cities to find the shortest path. "),
             400)
     cities = json.loads(request.form.get("cities"))
+    station1, station2 = get_closest_stations(cities)
     pass
 
 app.run(host="0.0.0.0", port="5000", debug=True)

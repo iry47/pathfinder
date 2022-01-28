@@ -3,6 +3,7 @@ import unittest
 import mpu
 
 from app.back.route_detection.distance import get_geo_distance
+from app.back.route_detection.distance import get_closest_stations
 
 
 class TestRouteDetection(unittest.TestCase):
@@ -25,3 +26,13 @@ class TestRouteDetection(unittest.TestCase):
         )
 
         self.assertEqual(geo_distance, 278.45817507541943)
+
+    def test_get_closest_stations(self):
+        result = get_closest_stations({
+            'departure': 'paris',
+            'destination': 'lyon'
+        })
+
+        expected = ('Gare de Paris-Montparnasse 1-2', 'Lyon-St-Paul-la-Feuilée')
+
+        self.assertEqual(result, expected)

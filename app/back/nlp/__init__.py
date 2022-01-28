@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 import spacy
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
-from geopy.geocoders import Nominatim
+from langdetect import detect
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 nlp = spacy.load("fr_core_news_md")
@@ -46,6 +46,7 @@ def extract_travel_request(sentences):
         str: travel request sentence or SPAM
     """
     # model must already be loaded
+
     sentence_embeddings = model.encode(sentences)
     real_sentence_embedding = model.encode(example_travel_sentence)
     similarities = cosine_similarity(
@@ -87,23 +88,38 @@ def determine_departure_destination(sentence):
         "destination": destination
     }
 
-    
+
+def is_french(text):
+    """
+    Determine if the text provided is in french
+    Args:
+        text (str): text to analyze
+
+    Returns: True if french or False if not
+
+    """
+    return 'fr' == detect(text)
+
+
 def extract_travel_info(sentences):
+    """
+    Extract the required information for the text to determine
+    the departure and destination
+    Args:
+        sentences (list<str>): list of sentences
+
+    Returns:
+        dict: departure and destination if there is a travel request
+        OR False if the given sentences are not valid
+
+    """
+    if not is_french(sentences[0]):
+        return False
+
     travel_request = extract_travel_request(sentences)
-    if not travel_request: return False
+    if not travel_request:
+        return False
+
     return determine_departure_destination(travel_request)
 
 
-def get_geolocation(city):
-    """Get the geolocation of a city
-
-    Args:
-        city (str): name of a city
-
-    Returns:
-        Array<geopy.location.Location>: Name, region, department, country, [lat, long, other]
-    """
-    geolocator = Nominatim(user_agent="travel_request")
-    location = geolocator.geocode(city)
-    print(location)
-    return location
