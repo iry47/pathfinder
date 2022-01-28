@@ -36,15 +36,12 @@ def index():
 
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():
-    sentences = [
-        'Voyager en train de lille à lyon',
-        'Les trains sont mieux. J\'irai de Lille à Lyon',
-        'A toulon et prendre un bus à marseille',
-        'A toulon et prendre un avion à marseille',
-        'A toulon et marcher à marseille',
-        'Manger des fruits',
-        'Nager a la plage'
-    ]
+    sentences = 'Voyager en train de lille à lyon Les trains sont mieux. ' \
+                'J\'irai de Lille à Lyon A toulon et prendre un bus à marseille. ' \
+                'A toulon et prendre un avion à marseille. ' \
+                'A toulon et marcher à marseille. ' \
+                'Manger des fruits Nager a la plage.'
+
     return template.render(
         text=sentences,
         step2=True,
@@ -96,19 +93,16 @@ def speech_to_text():
 
 @app.route("/travel-request", methods=["GET", "POST"])
 def travel_request():
-    return template.render(
-        cities="Paris, Lyon",
-        step2=True,
-        step3=True
-    )
     if request.form.get("sentences") is None:
         make_response(jsonify(
                 success=False,
                 message="You need to provide sentences to determine the travel request"),
             400)
 
-    ic(request.form.get("sentences"))
-    result = extract_travel_request(json.loads(request.form.get("sentences")))
+    sentences = json.loads(request.form.get("sentences")).split('.')
+
+    ic(sentences)
+    result = extract_travel_request(sentences)
 
     if result == False:
         make_response(jsonify(
@@ -116,16 +110,16 @@ def travel_request():
                 message="There was no valid travel request detected"),
             400)
 
-    make_response(jsonify(
-            success=True,
-            result=result),
-        200)
-
     return template.render(
         cities=result,
         step2=True,
         step3=True
     )
+
+    make_response(jsonify(
+        success=True,
+        result=result),
+        200)
 
 
 @app.route("/pathfinder", methods=["POST"])
