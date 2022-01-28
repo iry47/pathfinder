@@ -61,7 +61,6 @@ def get_closest_stations(cities):
             row.stop_lat,
             row.stop_lon
         )
-        print(distance_to_departure, departure["distance"])
         if distance_to_departure < departure["distance"]:
             departure["stop"] = row.stop_name
             departure["distance"] = distance_to_departure
