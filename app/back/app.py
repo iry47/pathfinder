@@ -6,7 +6,7 @@ import json
 import jinja2
 from flask import Flask, request, redirect, make_response, jsonify
 from vosk import Model, KaldiRecognizer, SetLogLevel
-from .nlp import extract_travel_info
+from nlp import extract_travel_info
 from icecream import ic
 
 ALLOWED_EXTENSIONS = {'wav'}

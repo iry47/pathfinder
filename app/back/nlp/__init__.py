@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+import nltk
+nltk.download('punkt')
+
+
 # import matplotlib.pyplot as plt
 
 from nltk import word_tokenize

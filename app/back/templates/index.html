@@ -109,7 +109,7 @@
         }
         function stopRecording() {
             console.log("stopRecording() called");          
-            gumStream.getAudioTracks()[0].stop();
+            gumStream.getAudioTracks()[0].stop(); // Error here
             recorder.finishRecording();
             __log('Recording stopped');
         }
