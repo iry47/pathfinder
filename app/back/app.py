@@ -6,8 +6,11 @@ import json
 import jinja2
 from flask import Flask, request, redirect, make_response, jsonify
 from vosk import Model, KaldiRecognizer, SetLogLevel
-from .nlp import extract_travel_info
+from nlp import extract_travel_info
 from icecream import ic
+
+from graph_exploration.exploration import convert_city_to_stop_points, load_graph, graph_exploration, convert_route_to_cities
+from graph_exploration.utils import get_shortest_route
 
 ALLOWED_EXTENSIONS = {'wav'}
 app = Flask(__name__)
@@ -76,7 +79,7 @@ def speech_to_text():
         exit(1)
 
     wf = wave.open(file_path, "rb")
-    
+
     if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
         print ("Audio file must be WAV format mono PCM.")
         exit(1)
@@ -142,18 +145,28 @@ def travel_request():
 
 @app.route("/pathfinder", methods=["POST"])
 def pathfinder():
-    return template.render(
-        journey="Paris to Lyon on Line 5",
-        step2=False,
-        step3=True
-    )
-    if request.form.get("cities") is None:
+    if request.form.get('origin') is None or request.form.get('dest') is None:
         make_response(jsonify(
                 success=False,
                 message="You need to post cities to find the shortest path. "),
             400)
-    cities = json.loads(request.form.get("cities"))
-    station1, station2 = get_closest_stations(cities)
-    pass
+
+    origin = convert_city_to_stop_points(request.form.get('origin'))
+    dest = convert_city_to_stop_points(request.form.get('dest'))
+    if len(origin) < 1 and len(dest) < 1:
+        result = "Trajet Impossible"
+    else:
+        origin = origin[0]
+        dest = dest[0]
+
+        graph = load_graph()
+        routes = graph_exploration(graph, origin, dest)
+        route = get_shortest_route(routes)
+        result = "{} en {}".format(" -> ".join(convert_route_to_cities(route)), route["duration"])
+    return template.render(
+    journey=result,
+    step2=False,
+    step3=True
+    )
 
 app.run(host="0.0.0.0", port="5000", debug=True)

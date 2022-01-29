@@ -23,3 +23,12 @@ def get_duration_node_to_node(origin, dest):
      )
 
     return arrival_delta - start_delta
+
+def get_shortest_route(routes):
+    shortest_duration = routes[0]["duration"]
+    shortest_route = routes[0]
+    for route in routes:
+        if route["duration"] < shortest_duration:
+            shortest_duration = route["duration"]
+            shortest_route = route
+    return shortest_route

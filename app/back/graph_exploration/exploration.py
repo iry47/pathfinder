@@ -1,16 +1,18 @@
 import pandas as pd
 import requests
 from datetime import datetime
+from datetime import timedelta
 import pickle
 
+from .utils import get_duration_node_to_node
 
-def load_stops_data():
-    f = open("./../../data/cities.pkl", "rb")
+def load_cities():
+    f = open("./../data/cities.pkl", "rb")
     cities = pickle.load(f)
     f.close()
 
     if not cities:
-        stops = pd.read_csv('./../../data/data_sncf/stops.csv', sep=",")
+        stops = pd.read_csv('./../data/data_sncf/stops.csv', sep=",")
         stops = stops[stops['stop_id'].str.contains('StopPoint:OCETrain')]
         stops = stops.set_index('stop_id').T.to_dict()
         cities = {}
@@ -24,32 +26,35 @@ def load_stops_data():
     return cities
 
 def load_trips():
-    f = open("trips.pkl", "rb")
-trips_tmp = pickle.load(f)
-f.close()
+    f = open("./../data/trips.pkl", "rb")
+    trips_tmp = pickle.load(f)
+    f.close()
 
-if trips_tmp is None:
-    stop_times = pd.read_csv('./../../data_sncf/stop_times.csv', sep=",")
-    trips = pd.read_csv('./../../data_sncf/trips.csv', sep=",")
+    if trips_tmp is None:
+        stop_times = pd.read_csv('./../data/data_sncf/stop_times.csv', sep=",")
+        trips = pd.read_csv('./../data/data_sncf/trips.csv', sep=",")
 
-    stop_times = stop_times[stop_times['stop_id'].str.contains('StopPoint:OCETrain')]
+        stop_times = stop_times[stop_times['stop_id'].str.contains('StopPoint:OCETrain')]
 
-    trips = trips.drop(labels=["service_id", "block_id", "shape_id", "trip_headsign"], axis=1)
+        trips = trips.drop(labels=["service_id", "block_id", "shape_id", "trip_headsign"], axis=1)
 
-    trips = trips.set_index('trip_id').T.to_dict()
+        trips = trips.set_index('trip_id').T.to_dict()
 
-    trips_tmp = {}
-    for trip in list(trips.items()):
-        trips_tmp.update({trip[0]:{"nodes": []}})
-        selected_stop_times = stop_times.loc[stop_times['trip_id'] == trip[0]]
-        for trip_tmp in selected_stop_times.iterrows():
-            trips_tmp[trip[0]]["nodes"].append({"trip_id": trip[0], "stop_id": trip_tmp[1]["stop_id"],"arrival_time": trip_tmp[1]["arrival_time"]})
+        trips_tmp = {}
+        for trip in list(trips.items()):
+            trips_tmp.update({trip[0]:{"nodes": []}})
+            selected_stop_times = stop_times.loc[stop_times['trip_id'] == trip[0]]
+            for trip_tmp in selected_stop_times.iterrows():
+                trips_tmp[trip[0]]["nodes"].append({"trip_id": trip[0], "stop_id": trip_tmp[1]["stop_id"],"arrival_time": trip_tmp[1]["arrival_time"]})
     return trips_tmp
 
 def load_graph():
-    f = open("./../../data/graph.pkl", "rb")
+    f = open("./../data/graph.pkl", "rb")
     routes_graph = pickle.load(f)
     f.close()
+
+    trips_tmp = load_trips()
+    cities = load_cities()
 
     if routes_graph:
         routes_graph = {}
@@ -70,7 +75,29 @@ def load_graph():
     return routes_graph
 
 
+def convert_route_to_cities(route):
+    cities = load_cities()
+    route_cities = []
+    # for route in routes:
+    for city in route["route"]:
+        route_cities.append(cities[list(city)[0]]["stop_name"])
+    return route_cities
+
+
+def convert_city_to_stop_points(city):
+    stops_tmp = pd.read_csv('./../data/data_sncf/stops.csv', sep=",")
+    stops_tmp = stops_tmp[stops_tmp['stop_id'].str.contains('StopPoint:OCETrain')]
+    stops_tmp = stops_tmp[stops_tmp['stop_name'].str.contains(city)]
+    stop_points = []
+    for stop in stops_tmp.iterrows():
+        stop_points.append({stop[1]["stop_id"]: timedelta(hours=0)})
+    return stop_points
+
+
+
 def graph_exploration(graph, start, goal):
+    cities = load_cities()
+
     explored = []
     queue = [[start]]
     if start == goal:
