@@ -151,8 +151,8 @@ def pathfinder():
                 message="You need to post cities to find the shortest path. "),
             400)
 
-    origin = convert_city_to_stop_points(request.form.get('origin'))
-    dest = convert_city_to_stop_points(request.form.get('dest'))
+    origin = convert_city_to_stop_points(request.form.get('departure'))
+    dest = convert_city_to_stop_points(request.form.get('destination'))
     if len(origin) < 1 and len(dest) < 1:
         result = "Trajet Impossible"
     else:
