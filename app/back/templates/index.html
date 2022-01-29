@@ -14,12 +14,11 @@
                 <h1>Travel Order Resolver</h1>
                 {% if step1 %}
                 <div id="step1" class="mt-5">
-                    <form method="POST" action="/speech-to-text">
-                        <h2>Step One: Record your request</h2>
-                        <input type="file" name="audio" hidden id="audioFile"/>
-                        <button id="recordButton" class="btn btn-primary" type="button">Start Record</button>
-                        <button id="stopButton" class="btn btn-primary" type="button">Stop Record</button>
-                        <button id="downloadButton" class="btn btn-primary" type="submit">Send Audio</button>
+                    <form method="post" enctype="multipart/form-data">
+                        <h2>Step One: Upload your audio file</h2>
+                        <input class="btn btn-primary" type="file" name="file"/>
+                        <br>
+                        <input class="btn btn-primary" type="submit" value="Upload">
                     </form>
                 </div>
                 {% endif %}
@@ -57,99 +56,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script>
-        URL = window.URL || window.webkitURL;
-        var gumStream;
-        var recorder;
-        var input;
-        var encodeAfterRecord = true;
-        var AudioContext = window.AudioContext || window.webkitAudioContext;
-        var audioContext; 
-        var recordButton = document.getElementById("recordButton");
-        var stopButton = document.getElementById("stopButton");
-
-        recordButton.addEventListener("click", startRecording);
-        stopButton.addEventListener("click", stopRecording);
-            function startRecording() {
-                console.log("startRecording() called");
-            var constraints = { audio: true, video:false }
-            
-            navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-		        __log("getUserMedia() success, stream created, initializing WebAudioRecorder...");
-                audioContext = new AudioContext();
-                document.getElementById("formats").innerHTML="Format: 2 channel wav@ "+audioContext.sampleRate/1000+"kHz"
-                gumStream = stream;
-                input = audioContext.createMediaStreamSource(stream);
-                encodingType = "wav"
-                recorder = new WebAudioRecorder(input, {
-		            workerDir: "js/",
-		            encoding: encodingType,
-		            numChannels:2, 
-		            onEncoderLoading: function(recorder, encoding) {
-                    __log("Loading "+encoding+" encoder...");
-                    },
-                    onEncoderLoaded: function(recorder, encoding) {
-                    __log(encoding+" encoder loaded");
-                    }
-		        });
-                recorder.onComplete = function(recorder, blob) { 
-                    __log("Encoding complete");
-                    createDownloadLink(blob,recorder.encoding);
-                    encodingTypeSelect.disabled = false;		        
-                }
-                recorder.setOptions({
-                    timeLimit:120,
-                    encodeAfterRecord:encodeAfterRecord,
-                    ogg: {quality: 0.5},
-                    mp3: {bitRate: 160}
-	            });
-                recorder.startRecording();
-                __log("Recording started");
-            }).catch(function(err) {
-	        });
-        }
-        function stopRecording() {
-            console.log("stopRecording() called");          
-            gumStream.getAudioTracks()[0].stop();
-            recorder.finishRecording();
-            __log('Recording stopped');
-        }
-        function createDownloadLink(blob,encoding) {
-	
-            var url = URL.createObjectURL(blob);
-            var au = document.createElement('audio');
-            var li = document.createElement('li');
-            var link = document.createElement('a');
-
-            au.controls = true;
-            au.src = url;
-
-            link.href = url;
-            link.download = new Date().toISOString() + '.'+encoding;
-            link.innerHTML = link.download;
-            li.appendChild(au);
-            li.appendChild(link);
-
-            recordingsList.appendChild(li);
-        }
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('#startRecordingButton').click(function() {
-                recordAudio()
-            })
-        }),
-        $('#toFile').hide()
-        $(document).ready(function() {
-            $('#setFile').click(function() {
-                if($(this).prop("checked", true)){
-                    $('#toRecord').hide()
-                    $('#toFile').show()
-                }else {
-                   $('#toFile').hide()
-                    $('#toRecord').show()
-                }
-            })
-        })
         function getSpeechResult() {
             $('#sentences').val(JSON.stringify($('#speechResult').text().toString()))
         }

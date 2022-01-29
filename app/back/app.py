@@ -14,7 +14,7 @@ from graph_exploration.utils import get_shortest_route
 
 ALLOWED_EXTENSIONS = {'wav'}
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = "./uploaded/"
+app.config['UPLOAD_FOLDER'] = "./"
 os.environ["PYTHONIOENCODING"] = "utf-8"
 SetLogLevel(-1)
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -29,34 +29,34 @@ def allowed_file(filename):
     return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @app.route("/", methods=["GET"])
 def index():
-
-    files = [f for f in os.listdir(audio_file_path) if os.path.isfile(os.path.join(audio_file_path, f))]
-
     return template.render(
-        files=files,
         step1=True,
         step2=False,
         step3=False
     )
 
-@app.route("/speech-to-text", methods=["POST"])
+@app.route("/", methods=["POST"])
 def speech_to_text():
+    if request.method == "POST":
+        print("FORM DATA RECEIVED")
+        f = request.files['file']
+        f.save(f.filename)
+
     sentences = 'Voyager en train de lille à lyon Les trains sont mieux. ' \
                 'J\'irai de Lille à Lyon A toulon et prendre un bus à marseille. ' \
                 'A toulon et prendre un avion à marseille. ' \
                 'A toulon et marcher à marseille. ' \
                 'Manger des fruits Nager a la plage.'
-
-
     return template.render(
+        name= f.filename,
         text=sentences,
         step1=False,
         step2=True,
         step3=False
     )  # tester
+
     ic(request.form.get("toFile"))
     if request.form.get("toFile") == "on":
         file_path = os.path.join(audio_file_path, request.form.get("audio_file"))
