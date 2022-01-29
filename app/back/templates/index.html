@@ -8,21 +8,51 @@
     <link href="../static/index.css" rel="stylesheet" crossorigin="anonymous">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <div class="row text-center">
             <div class="col">
                 <h1>Travel Order Resolver</h1>
-                <div class="mt-5">
+                {% if step1 %}
+                <div id="step1" class="mt-5">
                     <form method="POST" action="/speech-to-text">
-                        <h2>Step One: Record your request</h2>
-                        <input type="text" name="text" hidden />
-                        <button id="record" class="btn btn-primary" type="submit">Record</button>
+                        <h2>Component One: Voice Component</h2>
+                        <div class="row">
+                            <div class="col-md-6 input-group mt-5 justify-content-center">
+                                  <div class="input-group-prepend mx-sm-2">
+                                    <div class="input-group-text">
+                                      <input id="setFile" type="checkbox" name="toFile" aria-label="Checkbox for following text input">
+                                    </div>
+                                  </div>
+                                <label>Select Existing File</label>
+                            </div>
+                        </div>
+                        <div class="row mt-5">
+                            <div id="toRecord" class="col-sm-12">
+                                <h4>Record your voice</h4>
+                                <input type="text" name="text" hidden />
+
+                                <button id="record" class="btn btn-primary" type="submit">Record</button>
+                                <button id="stop" class="btn btn-primary" type="submit">Stop</button>
+                            </div>
+                            <div id="toFile" class="col-sm-12">
+                                <h4>Choose a file</h4>
+                                {% if files %}
+                                <select name="audio_file">
+                                    {% for f in files: %}
+                                    <option>{{ f }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button id="sendAudio" class="btn btn-primary mt-5" type="submit">Send Audio</button>
                     </form>
                 </div>
+                {% endif %}
                 {% if step2 %}
                 <div id="step2" class="mt-5">
                     <form method="POST" action="/travel-request">
-                        <h2>Step Two: Text validation</h2>
+                        <h2>Component Two: Natural Language Processing</h2>
                         <p>Check to see if your transcription is right</p>
                         {% if text %}
                         <p id="speechResult" class="result-text">{{ text }}</p>
@@ -34,13 +64,13 @@
                 </div>
                 {% endif %}
                 {% if step3 %}
-                <div id="step3" class="mt-5">
+                <div id="step3" class="mt-5 mb-5">
                     <form method="POST" action="/pathfinder">
                         <h2>Step Three: Find the best path to take</h2>
                         {% if cities %}
-                        <p class="result-text">Travel between {{ cities }}</p>
+                        <p class="result-text">Travel between {{ cities["departure"] }} and {{ cities["destination"] }}</p>
                         {% endif %}
-                        <button id="find" class="btn btn-primary" type="submit">Find</button>
+                        <button id="find" class="btn btn-primary mb-3" type="submit">Find</button>
                     </form>
                     {% if journey %}
                     <h4 class="journey">{{ journey }}</h4>
@@ -53,8 +83,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script>
+        $('#toFile').hide()
         $(document).ready(function() {
-
+            $('#setFile').click(function() {
+                if($(this).prop("checked", true)){
+                    $('#toRecord').hide()
+                    $('#toFile').show()
+                }else {
+                   $('#toFile').hide()
+                    $('#toRecord').show()
+                }
+            })
         })
         function getSpeechResult() {
             $('#sentences').val(JSON.stringify($('#speechResult').text().toString()))

@@ -4,7 +4,7 @@ import sys
 
 # sys.path.insert(0, '/Users/ryanheadley/epitech/tor_2021_3') # change for your project path
 import app
-from app.back.nlp import get_geolocation
+from app.back.route_detection.distance import get_geolocation
 from app.back.nlp import extract_travel_request
 from app.back.nlp import extract_travel_info
 from app.back.nlp import determine_departure_destination
@@ -29,7 +29,10 @@ class TextExtractTests(unittest.TestCase):
 
     def test_extract_travel_info(self):
         result = extract_travel_info(self.sentences)
-        expected = 'Les trains sont mieux. J\'irai de Lille à Lyon.'
+        expected = {
+            "departure": ["lille"],
+            "destination": ["lyon"]
+        }
         print(result)
         self.assertTrue(result == expected)
 

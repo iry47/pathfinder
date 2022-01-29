@@ -84,8 +84,8 @@ def determine_departure_destination(sentence):
         elif words[index-1] in words_before_destination: destination.append(city)
     
     return {
-        "departure": departure,
-        "destination": destination
+        "departure": departure[0],
+        "destination": destination[0]
     }
 
 
