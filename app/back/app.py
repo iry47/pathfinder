@@ -6,7 +6,7 @@ import json
 import jinja2
 from flask import Flask, request, redirect, make_response, jsonify
 from vosk import Model, KaldiRecognizer, SetLogLevel
-from nlp import extract_travel_request
+from .nlp import extract_travel_info
 from icecream import ic
 
 ALLOWED_EXTENSIONS = {'wav'}
@@ -19,7 +19,7 @@ jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(template_dir), autoescape=True
 )
 template = jinja_env.get_template("index.html")
-
+audio_file_path = './audio_files'
 
 
 def allowed_file(filename):
@@ -29,7 +29,12 @@ def allowed_file(filename):
 
 @app.route("/", methods=["GET"])
 def index():
+
+    files = [f for f in os.listdir(audio_file_path) if os.path.isfile(os.path.join(audio_file_path, f))]
+
     return template.render(
+        files=files,
+        step1=True,
         step2=False,
         step3=False
     )
@@ -42,23 +47,32 @@ def speech_to_text():
                 'A toulon et marcher à marseille. ' \
                 'Manger des fruits Nager a la plage.'
 
+
     return template.render(
         text=sentences,
+        step1=False,
         step2=True,
         step3=False
     )  # tester
-    uploaded_file = request.files["file"]
-    if uploaded_file and allowed_file(uploaded_file.filename):
-        filename = uploaded_file.filename
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        uploaded_file.save(file_path)
+    ic(request.form.get("toFile"))
+    if request.form.get("toFile") == "on":
+        file_path = os.path.join(audio_file_path, request.form.get("audio_file"))
+    else:
+        uploaded_file = request.files["file"]
+        if uploaded_file and allowed_file(uploaded_file.filename):
+            filename = uploaded_file.filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            uploaded_file.save(file_path)
 
-    model_name = "linto-model"
+    ic(file_path)
 
-    path = "./models/{}".format(model_name)
+    # model_name = "small"
+    model_name = "linto"
 
-    if not os.path.exists(path):
-        print ("Please download the model from https://alphacephei.com/vosk/models and unpack as 'model' in the current folder.")
+    model_path = "./models/{}".format(model_name)
+
+    if not os.path.exists(model_path):
+        print("Please download the model from https://alphacephei.com/vosk/models and unpack as 'model' in the current folder.")
         exit(1)
 
     wf = wave.open(file_path, "rb")
@@ -67,7 +81,7 @@ def speech_to_text():
         print ("Audio file must be WAV format mono PCM.")
         exit(1)
 
-    model = Model(path)
+    model = Model(model_path)
     rec = KaldiRecognizer(model, wf.getframerate())
     rec.SetMaxAlternatives(10)
     rec.SetWords(True)
@@ -99,10 +113,14 @@ def travel_request():
                 message="You need to provide sentences to determine the travel request"),
             400)
 
-    sentences = json.loads(request.form.get("sentences")).split('.')
+    # sentences = json.loads(request.form.get("sentences")).split('.')
 
-    ic(sentences)
-    result = extract_travel_request(sentences)
+    text_file = open("speech.txt", "r")
+    sentences = text_file.read()
+    text_file.close()
+
+    ic(sentences.split('.'))
+    result = extract_travel_info(sentences.split('.'))
 
     if result == False:
         make_response(jsonify(
@@ -112,7 +130,7 @@ def travel_request():
 
     return template.render(
         cities=result,
-        step2=True,
+        step2=False,
         step3=True
     )
 
@@ -126,7 +144,7 @@ def travel_request():
 def pathfinder():
     return template.render(
         journey="Paris to Lyon on Line 5",
-        step2=True,
+        step2=False,
         step3=True
     )
     if request.form.get("cities") is None:
@@ -135,6 +153,7 @@ def pathfinder():
                 message="You need to post cities to find the shortest path. "),
             400)
     cities = json.loads(request.form.get("cities"))
+    station1, station2 = get_closest_stations(cities)
     pass
 
 app.run(host="0.0.0.0", port="5000", debug=True)

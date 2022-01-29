@@ -8,11 +8,12 @@
     <link href="../static/index.css" rel="stylesheet" crossorigin="anonymous">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <div class="row text-center">
             <div class="col">
                 <h1>Travel Order Resolver</h1>
-                <div class="mt-5">
+                {% if step1 %}
+                <div id="step1" class="mt-5">
                     <form method="POST" action="/speech-to-text">
                         <h2>Step One: Record your request</h2>
                         <input type="file" name="audio" hidden id="audioFile"/>
@@ -21,10 +22,11 @@
                         <button id="downloadButton" class="btn btn-primary" type="submit">Send Audio</button>
                     </form>
                 </div>
+                {% endif %}
                 {% if step2 %}
                 <div id="step2" class="mt-5">
                     <form method="POST" action="/travel-request">
-                        <h2>Step Two: Text validation</h2>
+                        <h2>Component Two: Natural Language Processing</h2>
                         <p>Check to see if your transcription is right</p>
                         {% if text %}
                         <p id="speechResult" class="result-text">{{ text }}</p>
@@ -36,13 +38,13 @@
                 </div>
                 {% endif %}
                 {% if step3 %}
-                <div id="step3" class="mt-5">
+                <div id="step3" class="mt-5 mb-5">
                     <form method="POST" action="/pathfinder">
                         <h2>Step Three: Find the best path to take</h2>
                         {% if cities %}
-                        <p class="result-text">Travel between {{ cities }}</p>
+                        <p class="result-text">Travel between {{ cities["departure"] }} and {{ cities["destination"] }}</p>
                         {% endif %}
-                        <button id="find" class="btn btn-primary" type="submit">Find</button>
+                        <button id="find" class="btn btn-primary mb-3" type="submit">Find</button>
                     </form>
                     {% if journey %}
                     <h4 class="journey">{{ journey }}</h4>
@@ -136,6 +138,18 @@
                 recordAudio()
             })
         }),
+        $('#toFile').hide()
+        $(document).ready(function() {
+            $('#setFile').click(function() {
+                if($(this).prop("checked", true)){
+                    $('#toRecord').hide()
+                    $('#toFile').show()
+                }else {
+                   $('#toFile').hide()
+                    $('#toRecord').show()
+                }
+            })
+        })
         function getSpeechResult() {
             $('#sentences').val(JSON.stringify($('#speechResult').text().toString()))
         }

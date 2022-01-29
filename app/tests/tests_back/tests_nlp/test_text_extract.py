@@ -2,10 +2,12 @@ import unittest
 import sys
 
 
-sys.path.insert(0, '/Users/ryanheadley/epitech/tor_2021_3') # change for your project path
-from app.back.nlp.text_extract import get_geolocation
-from app.back.nlp.text_extract import extract_travel_request
-from app.back.nlp.text_extract import determine_departure_destination
+# sys.path.insert(0, '/Users/ryanheadley/epitech/tor_2021_3') # change for your project path
+import app
+from app.back.route_detection.distance import get_geolocation
+from app.back.nlp import extract_travel_request
+from app.back.nlp import extract_travel_info
+from app.back.nlp import determine_departure_destination
 from geopy import Location
 
 
@@ -26,10 +28,10 @@ class TextExtractTests(unittest.TestCase):
         ]
 
     def test_extract_travel_info(self):
-        result = extract_travel_request(self.sentences)
+        result = extract_travel_info(self.sentences)
         expected = {
-            "departure": "Lille",
-            "destination": "Lyon"
+            "departure": ["lille"],
+            "destination": ["lyon"]
         }
         print(result)
         self.assertTrue(result == expected)
@@ -37,8 +39,8 @@ class TextExtractTests(unittest.TestCase):
     def test_determine_departure_destination(self):
         result = determine_departure_destination(self.sentences[0])
         expected = {
-            "departure": "Lille",
-            "destination": "Lyon"
+            "departure": ["lille"],
+            "destination": ["lyon"]
         }
         self.assertEqual(result, expected)
         
@@ -46,3 +48,9 @@ class TextExtractTests(unittest.TestCase):
         result = get_geolocation('paris')
         expected = Location('Paris', 'Île-de-France', 'France métropolitaine', 'France', (48.8588897, 2.3200410217200766, 0.0))
         self.assertTrue(result == expected)
+
+    def test_get_travel_request(self):
+        result = extract_travel_request(self.sentences)
+        expected = 'Les trains sont mieux. J\'irai de Lille à Lyon'
+        print(result)
+        self.assertEqual(result, expected)
