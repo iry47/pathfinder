@@ -1,6 +1,7 @@
 import pandas as pd
 import mpu
 from geopy.geocoders import Nominatim
+from datetime import timedelta
 
 
 def get_geo_distance(lat1, lon1, lat2, lon2):
@@ -82,4 +83,4 @@ def get_closest_stations(cities):
             # destination["arrival_time"] = row.arrival_time
 
 
-    return departure["stop"], destination["stop"]
+    return {departure["stop"]: timedelta(hours=0)}, {destination["stop"]: timedelta(hours=0)}
