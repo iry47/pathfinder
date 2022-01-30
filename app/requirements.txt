@@ -91,3 +91,4 @@ Werkzeug==2.0.2
 mpu
 langdetect
 pyaudioconvert
+icecream

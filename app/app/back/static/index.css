@@ -1,0 +1,17 @@
+.result-text {
+    color: blue;
+    max-width: 300px;
+    margin: 0 auto;
+    margin-bottom: 40px;
+}
+.result-error {
+    color: red;
+    max-width: 300px;
+    margin: 0 auto;
+    margin-bottom: 40px;
+}
+.jounrey {
+    color: green;
+    margin: 0 auto;
+    margin-bottom: 40px;
+}
