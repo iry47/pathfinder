@@ -1,6 +1,7 @@
 import pandas as pd
 import mpu
 from geopy.geocoders import Nominatim
+from datetime import timedelta
 
 
 def get_geo_distance(lat1, lon1, lat2, lon2):
@@ -38,8 +39,9 @@ def get_closest_stations(cities):
     Returns:
         dict: departure station and destination station
     """
-    stops = pd.read_csv('../data/data_sncf/stops.txt') # TODO: fix path for application
-    stop_times = pd.read_csv('../../../data/data_sncf/stop_times.txt')
+    stops = pd.read_csv('app/app/data/data_sncf/stops.txt') # TODO: fix path for application
+    stops = stops[stops['stop_id'].str.contains('StopPoint:OCETrain')]
+    stop_times = pd.read_csv('app/app/data/data_sncf/stop_times.txt')
     geo_departure = get_geolocation(cities["departure"])
     geo_destination = get_geolocation(cities["destination"])
 
@@ -67,8 +69,6 @@ def get_closest_stations(cities):
         if distance_to_departure < departure["distance"]:
             departure["stop"] = row.stop_id
             departure["distance"] = distance_to_departure
-            # departure["arrival_time"] = row.arrival_time
-
 
         distance_to_destination = get_geo_distance(
             destination["current_lat"],
@@ -79,7 +79,5 @@ def get_closest_stations(cities):
         if distance_to_destination < destination["distance"]:
             destination["stop"] = row.stop_id
             destination["distance"] = distance_to_destination
-            # destination["arrival_time"] = row.arrival_time
-
-
-    return departure["stop"], destination["stop"]
+            
+    return {departure["stop"]: timedelta(hours=0)}, {destination["stop"]: timedelta(hours=0)}

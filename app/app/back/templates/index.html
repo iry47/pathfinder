@@ -58,8 +58,9 @@
                         <p id="speechResult" class="result-text">{{ text }}</p>
                         {% endif %}
                         <input id="sentences" name="sentences" type="text" hidden />
-                        <button class="btn btn-primary" type="button" onclick="getSpeechResult()">Good</button>
-                        <button id="view" class="btn btn-primary" type="submit">View</button>
+                        <button class="btn btn-primary" type="button" onclick="getSpeechResult()">It's good!</button>
+                        <br />
+                        <button id="view" class="btn btn-primary" type="submit">Get Details</button>
                     </form>
                 </div>
                 {% endif %}
@@ -76,8 +77,9 @@
                         {% elif error %}
                         <p class="result-error">{{ error }}</p>
                         {% endif %}
-                        <button class="btn btn-primary" type="button" onclick="getPathResult()">Good</button>
-                        <button id="find" class="btn btn-primary mb-3" type="submit">Find</button>
+                        <button class="btn btn-primary" type="button" onclick="getPathResult()">It's good!</button>
+                        <br />
+                        <button id="find" class="btn btn-primary mb-3" type="submit">Get Trip</button>
                     </form>
                     {% if journey %}
                     <h4 class="journey">{{ journey }}</h4>

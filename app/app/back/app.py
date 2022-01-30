@@ -9,8 +9,10 @@ from vosk import Model, KaldiRecognizer, SetLogLevel
 from nlp import extract_travel_info
 from icecream import ic
 
-from graph_exploration.exploration import convert_city_to_stop_points, load_graph, graph_exploration, convert_route_to_cities
-from graph_exploration.utils import get_shortest_route
+from route_detection.exploration import graph_exploration
+from route_detection.exploration import load_graph
+from route_detection.exploration import convert_route_to_cities
+from route_detection.utils import get_shortest_route
 from route_detection.distance import get_closest_stations
 
 ALLOWED_EXTENSIONS = {'wav'}
@@ -23,7 +25,8 @@ jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(template_dir), autoescape=True
 )
 template = jinja_env.get_template("index.html")
-audio_file_path = './audio_files'
+audio_file_path = 'app/app/data/audio_files'
+ic(os.getcwd())
 
 
 def allowed_file(filename):
@@ -75,10 +78,9 @@ def speech_to_text():
     file_path = os.path.join(audio_file_path, request.form.get("audio_file"))
     ic(file_path)
 
-    # model_name = "small"
     model_name = "linto"
-
-    model_path = "./models/{}".format(model_name)
+    ic("the path", os.getcwd())
+    model_path = "app/app/back/nlp/models/{}".format(model_name)
 
     if not os.path.exists(model_path):
         print("Please download the model from https://alphacephei.com/vosk/models and unpack as 'model' in the current folder.")
@@ -151,26 +153,22 @@ def travel_request():
 @app.route("/pathfinder", methods=["POST"])
 def pathfinder():
     ic(request.form.get('departure'))
-    origin = convert_city_to_stop_points(request.form.get('departure'))
-    dest = convert_city_to_stop_points(request.form.get('destination'))
     station1, station2 = get_closest_stations({
         "departure": request.form.get('departure'),
         "destination": request.form.get('destination')
     })
-    ic(origin)
-    ic(dest)
     ic(station1)
     ic(station2)
-    # if len(origin) < 1 and len(dest) < 1:
-    #     result = "Trajet Impossible"
-    # else:
-    origin = station1
-    dest = station2
+    if not station1 and not station2:
+        result = "Trajet Impossible"
+    else:
+        graph = load_graph()
+        routes = graph_exploration(graph, station1, station2)
+        route = get_shortest_route(routes)
+        result = "{} en {}".format(" -> ".join(convert_route_to_cities(route)), route["duration"])
+    print(result)
 
-    graph = load_graph()
-    routes = graph_exploration(graph, origin, dest)
-    route = get_shortest_route(routes)
-    result = "{} en {}".format(" -> ".join(convert_route_to_cities(route)), route["duration"])
+    
     return template.render(
         journey=result,
         step2=False,

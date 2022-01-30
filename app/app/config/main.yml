@@ -1,9 +1,0 @@
-epitech_data:
-  calendar_dates_path: "../../../data/data_sncf/calendar_dates.txt"
-  calendar_path: "../../../data/data_sncf/calendar.txt"
-  routes_path: "../../../data/data_sncf/routes.txt"
-  stop_times_path: "../../../data/data_sncf/stop_times.txt"
-  stops_path: "../../../data/data_sncf/stops.txt"
-  transfers_path: "../../../data/data_sncf/transfers.txt"
-  trips_path: "../../../data/data_sncf/trips.txt"
-  timetable_path: "../../../data/timetables.csv"
