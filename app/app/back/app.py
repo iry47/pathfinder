@@ -27,9 +27,6 @@ jinja_env = jinja2.Environment(
 template = jinja_env.get_template("index.html")
 audio_file_path = 'app/app/data/audio_files'
 ic(os.getcwd())
-current = os.getcwd()
-if current.split('/')[-1] != "tor_2021_3": 
-    os.chdir('../')
 
 
 def allowed_file(filename):
