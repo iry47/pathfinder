@@ -38,7 +38,7 @@ def get_closest_stations(cities):
     Returns:
         dict: departure station and destination station
     """
-    stops = pd.read_csv('../../../data/data_sncf/stops.txt') # TODO: fix path for application
+    stops = pd.read_csv('../data/data_sncf/stops.txt') # TODO: fix path for application
     geo_departure = get_geolocation(cities["departure"])
     geo_destination = get_geolocation(cities["destination"])
 

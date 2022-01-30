@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,11 +14,38 @@
                 <h1>Travel Order Resolver</h1>
                 {% if step1 %}
                 <div id="step1" class="mt-5">
-                    <form method="post" enctype="multipart/form-data">
-                        <h2>Step One: Upload your audio file</h2>
-                        <input class="btn btn-primary" type="file" name="file"/>
-                        <br>
-                        <input class="btn btn-primary" type="submit" value="Upload">
+                    <form method="POST" action="/speech-to-text">
+                        <h2>Component One: Voice Component</h2>
+<!--                        <div class="row">-->
+<!--                            <div class="col-md-6 input-group mt-5 justify-content-center">-->
+<!--                                  <div class="input-group-prepend mx-sm-2">-->
+<!--                                    <div class="input-group-text">-->
+<!--                                      <input id="setFile" type="checkbox" name="toFile" aria-label="Checkbox for following text input">-->
+<!--                                    </div>-->
+<!--                                  </div>-->
+<!--                                <label>Select Existing File</label>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <div class="row mt-5">
+                            <div id="toRecord" class="col-sm-12">
+                                <h4>Record your voice</h4>
+                                <input type="text" name="text" hidden />
+
+                                <button id="record" class="btn btn-primary" type="submit">Record</button>
+                                <button id="stop" class="btn btn-primary" type="submit">Stop</button>
+                            </div>
+                            <div id="toFile" class="col-sm-12">
+                                <h4>Choose a file</h4>
+                                {% if files %}
+                                <select name="audio_file">
+                                    {% for f in files: %}
+                                    <option>{{ f }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button id="sendAudio" class="btn btn-primary mt-5" type="submit">Send Audio</button>
                     </form>
                 </div>
                 {% endif %}
@@ -41,8 +68,15 @@
                     <form method="POST" action="/pathfinder">
                         <h2>Step Three: Find the best path to take</h2>
                         {% if cities %}
-                        <p class="result-text">Travel between {{ cities["departure"] }} and {{ cities["destination"] }}</p>
+                        <p class="result-text">Travel between <span id="departureResult">{{ cities["departure"] }}</span>
+                            and <span id="destinationResult">{{ cities["destination"] }}</span></p>
+                        <input id="departure" type="text" name="departure" hidden />
+                        <input id="destination" type="text" name="destination" hidden />
+                        <input id="cities" type="text" name="cities" hidden />
+                        {% elif error %}
+                        <p class="result-error">{{ error }}</p>
                         {% endif %}
+                        <button class="btn btn-primary" type="button" onclick="getPathResult()">Good</button>
                         <button id="find" class="btn btn-primary mb-3" type="submit">Find</button>
                     </form>
                     {% if journey %}
@@ -56,8 +90,28 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script>
+        $('#toRecord').hide()
+        $('#view').hide()
+        $('#find').hide()
+        $(document).ready(function() {
+            $('#setFile').click(function() {
+                if($(this).prop("checked", true)){
+                    $('#toRecord').hide()
+                    $('#toFile').show()
+                }else {
+                   $('#toFile').hide()
+                    $('#toRecord').show()
+                }
+            })
+        })
         function getSpeechResult() {
             $('#sentences').val(JSON.stringify($('#speechResult').text().toString()))
+            $('#view').show()
+        }
+        function getPathResult() {
+            $('#departure').val(JSON.stringify($('#departureResult').text().toString()))
+            $('#destination').val(JSON.stringify($('#destinationResult').text().toString()))
+            $('#find').show()
         }
     </script>
 </body>

@@ -85,7 +85,7 @@ def convert_route_to_cities(route):
 
 
 def convert_city_to_stop_points(city):
-    stops_tmp = pd.read_csv('./../data/data_sncf/stops.csv', sep=",")
+    stops_tmp = pd.read_csv('../data/data_sncf/stops.csv', sep=",")
     stops_tmp = stops_tmp[stops_tmp['stop_id'].str.contains('StopPoint:OCETrain')]
     stops_tmp = stops_tmp[stops_tmp['stop_name'].str.contains(city)]
     stop_points = []
