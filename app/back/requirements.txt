@@ -89,3 +89,5 @@ wasabi==0.9.0
 wcwidth==0.2.5
 Werkzeug==2.0.2
 mpu
+langdetect
+pyaudioconvert
