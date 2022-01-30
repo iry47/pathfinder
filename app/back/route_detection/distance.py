@@ -39,6 +39,7 @@ def get_closest_stations(cities):
         dict: departure station and destination station
     """
     stops = pd.read_csv('../data/data_sncf/stops.txt') # TODO: fix path for application
+    stop_times = pd.read_csv('../../../data/data_sncf/stop_times.txt')
     geo_departure = get_geolocation(cities["departure"])
     geo_destination = get_geolocation(cities["destination"])
 
@@ -46,13 +47,15 @@ def get_closest_stations(cities):
         "current_lat": geo_departure.latitude,
         "current_lon": geo_departure.longitude,
         "stop": "",
-        "distance": 99999
+        "distance": 99999,
+        "arrival_time": 0
     }
     destination = {
         "current_lat": geo_destination.latitude,
         "current_lon": geo_destination.longitude,
         "stop": "",
-        "distance": 99999
+        "distance": 99999,
+        "arrival_time": 0
     }
     for index, row in stops.iterrows():
         distance_to_departure = get_geo_distance(
@@ -62,8 +65,10 @@ def get_closest_stations(cities):
             row.stop_lon
         )
         if distance_to_departure < departure["distance"]:
-            departure["stop"] = row.stop_name
+            departure["stop"] = row.stop_id
             departure["distance"] = distance_to_departure
+            # departure["arrival_time"] = row.arrival_time
+
 
         distance_to_destination = get_geo_distance(
             destination["current_lat"],
@@ -72,7 +77,9 @@ def get_closest_stations(cities):
             row.stop_lon
         )
         if distance_to_destination < destination["distance"]:
-            destination["stop"] = row.stop_name
+            destination["stop"] = row.stop_id
             destination["distance"] = distance_to_destination
+            # destination["arrival_time"] = row.arrival_time
+
 
     return departure["stop"], destination["stop"]
